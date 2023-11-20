@@ -52,7 +52,7 @@ class FDAF(BaseModule):
         """Forward function."""
 
         output = torch.cat([x1, x2], dim=1)
-        flow = self.flow_make(output)
+        flow = self.flow_make(output)  # 得到全局偏移量flow = 论文中的delta p
         f1, f2 = torch.chunk(flow, 2, dim=1)
         x1_feat = self.warp(x1, f1) - x2
         x2_feat = self.warp(x2, f2) - x1
