@@ -79,7 +79,7 @@ class TinyFPN(BaseModule):
                  act_cfg=None,
                  upsample_cfg=dict(mode='nearest'),
                  init_cfg=dict(
-                     type='Xavier', layer='Conv2d', distribution='uniform')):
+                     type='Xavier', layer='Conv2d', distribution='uniform'),):
         super().__init__(init_cfg)
         assert isinstance(in_channels, list)
         self.in_channels = in_channels
@@ -121,15 +121,16 @@ class TinyFPN(BaseModule):
         for i in range(self.start_level, self.backbone_end_level):
             l_conv = ConvModule(
                 in_channels[i],
-                out_channels,
+                256,#out_channels[i],
                 1,
                 conv_cfg=conv_cfg,
                 norm_cfg=norm_cfg if not self.no_norm_on_lateral else None,
                 act_cfg=act_cfg,
                 inplace=False)
+           
             fpn_conv = TinyBlock(
-                in_channels=out_channels,
-                out_channels=out_channels,
+                in_channels=256,#out_channels[i],
+                out_channels=out_channels[i],
                 stride=1,
                 expand_ratio=1)
 
