@@ -36,7 +36,7 @@ train_pipeline = [
 
 train_dataloader = dict(
     dataset=dict(pipeline=train_pipeline),
-    batch_size=1)
+    batch_size=32)
 
 # optimizer
 optimizer=dict(

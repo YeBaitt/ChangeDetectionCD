@@ -345,4 +345,4 @@ visualizer = dict(
     vis_backends=[
         dict(type='CDLocalVisBackend'),
     ])
-work_dir = './changer_r18_levir_workdir'
+work_dir = 'changer_r18_levir_workdir'
