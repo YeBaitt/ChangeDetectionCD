@@ -213,15 +213,15 @@ class Changer(BaseDecodeHead):
         inputs1 = []
         inputs2 = []
         for input in inputs:
-            f1, f2 = torch.chunk(input, 2, dim=1)
+            f1, f2 = torch.chunk(input, 2, dim=1)  # 按通道拆分
             inputs1.append(f1)
             inputs2.append(f2)
         
-        out1 = self.base_forward(inputs1)
+        out1 = self.base_forward(inputs1)  # size of ([1, 64, 128, 128])
         out2 = self.base_forward(inputs2)
-        out = self.neck_layer(out1, out2, 'concat')
+        out = self.neck_layer(out1, out2, 'concat')  # size of ([1, 128, 128, 128])
 
-        out = self.discriminator(out)
-        out = self.cls_seg(out)
+        out = self.discriminator(out)  # size of ([1, 128, 128, 128])
+        out = self.cls_seg(out)  # size of ([1, 2, 128, 128])
 
         return out

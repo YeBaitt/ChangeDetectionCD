@@ -5,6 +5,7 @@ import torch.nn as nn
 from mmseg.models.backbones import ResNet
 from opencd.registry import MODELS
 
+from opencd.models.decode_heads.changer import FDAF
 
 @MODELS.register_module()
 class IA_ResNet(ResNet):
@@ -85,19 +86,27 @@ class IA_ResNet(ResNet):
         (1, 1024, 1, 1)
     """
     def __init__(self, 
-                 interaction_cfg=(None, None, None, None), mode='origin',
+                 interaction_cfg=(None, None, None, None), mode='origin', align_channel_size:list=None,
                  **kwargs):
         super().__init__(**kwargs)
         assert self.num_stages == len(interaction_cfg), \
             'The length of the `interaction_cfg` should be same as the `num_stages`.'
         # cross-correlation
         self.mode = mode
+
         self.ccs = []
         for ia_cfg in interaction_cfg:
             if ia_cfg is None:
                 ia_cfg = dict(type='TwoIdentity')
             self.ccs.append(MODELS.build(ia_cfg))
         self.ccs = nn.ModuleList(self.ccs)
+
+        if self.mode == 'alignEx':
+            self.aligns = []
+            for i, channel in enumerate(align_channel_size):
+                self.aligns.append(FDAF(in_channels=channel).cuda())
+
+
     
     def forward(self, x1, x2):
         """Forward function."""
@@ -131,6 +140,17 @@ class IA_ResNet(ResNet):
                 if i in self.out_indices:
                     x1_, x2_ = self.ccs[i](x1, x2)
                     outs.append(torch.cat([x1_, x2_], dim=1))
+                    
+        elif self.mode == 'alignEx':
+            for i, layer_name in enumerate(self.res_layers):
+                res_layer = getattr(self, layer_name)
+                x1 = res_layer(x1)
+                x2 = res_layer(x2)
+                out = self.aligns[i](x1, x2, 'concat').cuda()
+                x1, x2 = torch.chunk(out, 2, dim=1)  # 按通道拆分
+                if i in self.out_indices:
+                    x1, x2 = self.ccs[i](x1, x2)
+                    outs.append(torch.cat([x1, x2], dim=1))
 
         else:
             raise RuntimeError("invalid backbone mode(self-modified)")

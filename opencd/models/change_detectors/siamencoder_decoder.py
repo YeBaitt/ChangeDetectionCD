@@ -187,7 +187,7 @@ class SiamEncoderDecoder(BaseSegmentor):
 
         losses = dict()
 
-        loss_decode = self._decode_head_forward_train(x, data_samples)
+        loss_decode = self._decode_head_forward_train(x, data_samples)  # FDAF
         losses.update(loss_decode)
 
         if self.with_auxiliary_head:

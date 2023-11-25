@@ -57,6 +57,12 @@ log_level = 'INFO'
 log_processor = dict(by_epoch=False)
 model = dict(
     backbone=dict(
+        align_channel_size=[
+            64,
+            128,
+            256,
+            512,
+        ],
         contract_dilation=True,
         depth=18,
         dilations=(
@@ -71,6 +77,7 @@ model = dict(
             dict(p=0.5, type='ChannelExchange'),
             dict(p=0.5, type='ChannelExchange'),
         ),
+        mode='alignEx',
         norm_cfg=dict(requires_grad=True, type='SyncBN'),
         norm_eval=False,
         num_stages=4,
@@ -134,21 +141,6 @@ model = dict(
         sampler=dict(
             min_kept=100000, thresh=0.7, type='mmseg.OHEMPixelSampler'),
         type='Changer'),
-    neck=dict(
-        in_channels=[
-            128,
-            256,
-            512,
-            1024,
-        ],
-        num_outs=4,
-        out_channels=[
-            128,
-            256,
-            512,
-            1024,
-        ],
-        type='FPN'),
     pretrained=None,
     test_cfg=dict(mode='whole'),
     train_cfg=dict(),
@@ -217,7 +209,7 @@ test_pipeline = [
 ]
 train_cfg = dict(max_iters=40000, type='IterBasedTrainLoop', val_interval=4000)
 train_dataloader = dict(
-    batch_size=32,
+    batch_size=1,
     dataset=dict(
         data_prefix=dict(
             img_path_from='train/A',
@@ -360,4 +352,4 @@ visualizer = dict(
     vis_backends=[
         dict(type='CDLocalVisBackend'),
     ])
-work_dir = './changer_r18_512x512_FPN'
+work_dir = './changer_r18_512x512_alignEx'
